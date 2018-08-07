@@ -1,24 +1,50 @@
 class RidesApplication
   def call(env)
     request = Rack::Request.new(env)
-    if env["PATH_INFO"] == ""
-      if request.post?
-        begin
-          ride = JSON.parse(request.body.read)
-          Database.add_ride(ride)
-          [200, {}, ["Ride received\n"]]
-        rescue JSON::ParserError
-          response.status = 400
-          response.write("invalid JSON format")
-        end
-      else
-        [200, {}, [Database.rides.to_s]]
-      end
-    elsif env["PATH_INFO"] =~ %r{/\d+}
-      id = env["PATH_INFO"].split("/").last.to_i
-      [200, {}, [Database.rides[id].to_s]]
+    response = Rack::Response.new
+    response.headers["Content-Type"] = "application/json"
+
+    case request.path_info
+    when request.post? && ""
+      post_a_ride(request, response)
+    when request.get? && ""
+      get_all_rides(request, response)
+    when %r{/\d+}
+      get_a_ride(request, response)
     else
-      ["404", {}, ["Nothing Here!"]]
+      missing(request, response)
     end
+    response.finish
+  end
+
+  def post_a_ride(request, response)
+    ride = JSON.parse(request.body.read)
+    if ride["user_id"].nil?
+      error(response, "user_id field is required")
+    else
+      Database.add_ride(ride)
+      response.write(JSON.generate({message: "Ride received"}))
+    end
+  rescue JSON::ParserError
+    error(response, "Invalid JSON")
+  end
+
+  def get_all_rides(request, response)
+    response.write(JSON.generate(Database.rides))
+  end
+
+  def get_a_ride(request, response)
+    id = request.path_info.split("/").last.to_i
+    response.write(JSON.generate(Database.rides[id]))
+  end
+
+  def missing(request, response)
+    response.status = 404
+    response.write("Nothing here!")
+  end
+
+  def error(response, message, status = 400)
+    response.status = status
+    response.write("ERROR: #{message}")
   end
 end
