@@ -1,4 +1,4 @@
-# Rails on Rack App
+# Ruby on Rack App
 # Ride sharing with mock data base
 
 ## Setup
