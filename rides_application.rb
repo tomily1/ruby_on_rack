@@ -3,9 +3,14 @@ class RidesApplication
     request = Rack::Request.new(env)
     if env["PATH_INFO"] == ""
       if request.post?
-        ride = JSON.parse request.body.read
-        Database.add_ride(ride)
-        [200, {}, ["Ride received\n"]]
+        begin
+          ride = JSON.parse(request.body.read)
+          Database.add_ride(ride)
+          [200, {}, ["Ride received\n"]]
+        rescue JSON::ParserError
+          response.status = 400
+          response.write("invalid JSON format")
+        end
       else
         [200, {}, [Database.rides.to_s]]
       end
