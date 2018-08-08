@@ -29,7 +29,7 @@ class RidesApplication
     error(response, "Invalid JSON")
   end
 
-  def get_all_rides(request, response)
+  def get_all_rides(_request, response)
     response.write(JSON.generate(Database.rides))
   end
 
@@ -38,9 +38,8 @@ class RidesApplication
     response.write(JSON.generate(Database.rides[id]))
   end
 
-  def missing(request, response)
-    response.status = 404
-    response.write("Nothing here!")
+  def missing(_request, response)
+    error(response, "Nothing here!", 404)
   end
 
   def error(response, message, status = 400)
