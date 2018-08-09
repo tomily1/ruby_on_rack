@@ -5,7 +5,9 @@ class UsersApplication
     response.headers["Content-Type"] = "application/json"
 
     case request.path_info
-    when "" || "/"
+    when ""
+      get_all_users(request, response)
+    when "/"
       get_all_users(request, response)
     when request.get? && %r{/\d+}
       get_a_user(request, response)
