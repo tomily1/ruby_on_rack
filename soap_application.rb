@@ -3,11 +3,11 @@ class SoapApplication
     request = Rack::Request.new(env)
     response = Rack::Response.new
     response.headers["Content-Type"] = "application/xml"
-    response.write(product_xml)
+    response.write(rides_xml)
     response.finish
   end
 
-  def product_xml
+  def rides_xml
     xml = Builder::XmlMarkup.new( :indent => 2 )
     xml.instruct! :xml, :encoding => "ASCII"
     xml.rides do |p|
