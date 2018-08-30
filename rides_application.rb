@@ -9,6 +9,8 @@ class RidesApplication
       post_a_ride(request, response)
     when request.get? && ""
       get_all_rides(request, response)
+    when request.get? && "/"
+      get_all_rides(request, response)
     when %r{/\d+}
       get_a_ride(request, response)
     else
@@ -35,7 +37,12 @@ class RidesApplication
 
   def get_a_ride(request, response)
     id = request.path_info.split("/").last.to_i
-    response.write(JSON.generate(Database.rides[id]))
+    ride = Database.rides[id]
+    if ride.nil?
+      missing(request, response)
+    else
+      response.write(JSON.generate(ride))
+    end
   end
 
   def missing(_request, response)
